@@ -48,8 +48,6 @@ async function getLatLon(location, apiKey) {
     return new Promise(async (resolve, reject) => {
         const response = await fetch(`https://api.openweathermap.org/geo/1.0/direct?q=${location}&limit=5&appid=${apiKey}`);
         const potentialLocations = await response.json();
-         
-        console.log(potentialLocations.length); 
 
         if (potentialLocations.length === 0) {
             console.log('Sorry, I can\'t find such a city :C');
