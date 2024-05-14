@@ -1,12 +1,11 @@
 const fs = require('node:fs');
 const path = require('path');
-const os = require('os')
+const os = require('os');
+const readline = require('node:readline');
 
 const filePath = path.join(os.homedir(), '.weather-cli');
 
 async function setApiKey() {
-    const readline = require('node:readline');
-    
     // ask the user for the API key acquire his answer 
     const rl = readline.createInterface({
         input: process.stdin,
@@ -30,6 +29,7 @@ async function setApiKey() {
 
 async function getApiKey() {
     return new Promise((resolve, reject) => {
+        // it reads a file in which there is stored API key for OpenWeather 
         fs.readFile(filePath, 'utf8', async (err, data) => {
             // if the file doesn't exist the function setApiKey is called to set the API key 
             if (err && err.code === 'ENOENT') { 
@@ -42,8 +42,47 @@ async function getApiKey() {
             } 
         })
     })
-    // it reads a file in which there is stored API key for OpenWeather 
 }
+
+async function getLatLon(location, apiKey) {
+    return new Promise(async (resolve, reject) => {
+        const response = await fetch(`https://api.openweathermap.org/geo/1.0/direct?q=${location}&limit=5&appid=${apiKey}`);
+        const potentialLocations = await response.json();
+         
+        console.log(potentialLocations.length); 
+
+        if (potentialLocations.length === 0) {
+            console.log('Sorry, I can\'t find such a city :C');
+            reject([]);
+        } else if (potentialLocations.length === 1) {
+            resolve([potentialLocations[0].lat, potentialLocations[0].lon]);
+        } else {
+            for (let x in potentialLocations) {
+                console.log('===================')
+                console.log(`${1+Number(x)}. ${potentialLocations[x].name}`);
+                console.log(`${potentialLocations[x].country}, ${potentialLocations[x].state}`);
+            }
+            console.log('===================')
+            const rl = readline.createInterface({
+                input: process.stdin,
+                output: process.stdout,
+            });
+            rl.question(`Which place do you mean? (1-${potentialLocations.length}): `, answer => {
+                rl.close();
+                resolve([potentialLocations[Number(answer)-1].lat, potentialLocations[Number(answer)-1].lon]);
+            });
+        }
+    });
+}
+
+
+// async function displayWeatherInfo(latitude, longtitude, apiKey) {
+//     const response = await fetch(`https://api.openweathermap.org/data/2.5/weather?lat=${latitude}&lon=${longtitude}appid=${apiKey}`);
+//     const weatherData = await response.json();
+//     
+//     console.log(weatherData);
+//
+// }
 
 
 async function main() {
@@ -63,8 +102,12 @@ async function main() {
     }
     
     if (typeof args.l === 'string') {
-        console.log(`location: ${args.l}`);
-        console.log(`api key: ${apiKey}`);
+        try { 
+            const letLon = await getLatLon(args.l, apiKey);
+            // displayWeatherInfo(letLon[0], letLon[1], apiKey);
+        } catch (error) {
+            console.error(error) 
+        }
     } else {
         console.log("Please define your city (i. e. weather-cli -l Poznan)");
     }
