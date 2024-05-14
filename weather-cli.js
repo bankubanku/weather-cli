@@ -76,13 +76,19 @@ async function getLatLon(location, apiKey) {
 }
 
 
-// async function displayWeatherInfo(latitude, longtitude, apiKey) {
-//     const response = await fetch(`https://api.openweathermap.org/data/2.5/weather?lat=${latitude}&lon=${longtitude}appid=${apiKey}`);
-//     const weatherData = await response.json();
-//     
-//     console.log(weatherData);
-//
-// }
+async function displayWeatherInfo(latitude, longtitude, apiKey, unit='metric') {
+    const response = await fetch(`https://api.openweathermap.org/data/2.5/weather?lat=${latitude}&lon=${longtitude}&appid=${apiKey}&units=${unit}`);
+    const weatherData = await response.json();
+    
+    console.log('===================')
+    console.log('Current weather: ' + weatherData.weather[0].description);
+    console.log('Current temperature: ' + weatherData.main.temp + String.fromCharCode(176) + 'C');
+    console.log('Feels like: ' + weatherData.main.feels_like + String.fromCharCode(176) + 'C');
+    console.log('Pressure: ' + weatherData.main.pressure + 'hPa');
+    console.log('Humidity: ' + weatherData.main.humidity + '%');
+    console.log('Visibility: ' + weatherData.visibility/1000 + 'km');
+    console.log('Wind: ' + weatherData.wind.speed + 'm/s');
+}
 
 
 async function main() {
@@ -104,7 +110,7 @@ async function main() {
     if (typeof args.l === 'string') {
         try { 
             const letLon = await getLatLon(args.l, apiKey);
-            // displayWeatherInfo(letLon[0], letLon[1], apiKey);
+            displayWeatherInfo(letLon[0], letLon[1], apiKey);
         } catch (error) {
             console.error(error) 
         }
