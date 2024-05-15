@@ -1,6 +1,7 @@
 # weather-cli
 App written in JavaScript that displays basic info about the current weather in a Linux terminal. 
-![[./screenshot.png]]
+
+![screenshot showing example usage of an app](screenshot.png)
 
 # installation 
 Install [node.js](https://nodejs.org) if you don't have it installed yet.
